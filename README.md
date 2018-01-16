@@ -1,5 +1,5 @@
 # MathFortran
-Contains code in Fortran for various general math algorithms written during my tenure at IIT Madras.
+Contains standalone code in Fortran for various general math algorithms written during my tenure at IIT Madras.
 
 ## Functions Implemented
 1. **length3d**  - Finds length of two points on 3d cartesian plane

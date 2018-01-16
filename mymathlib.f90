@@ -240,20 +240,5 @@ contains
     100 format(ES14.3)
   end subroutine print_mat
 
-  ! -------------------------------------------------
-  !                norm
-  ! -------------------------------------------------
-  function norm(abcvec)
-    real(dp), intent(in), dimension(:) :: abcvec
-    real(dp) :: norm
-    integer :: is
-    norm =0._dp
-    do is=1,size(abcvec)
-      norm = norm + abcvec(is)*abcvec(is)
-    enddo
-    norm=sqrt(norm)
-  end function norm
-
-
 
 end module mymathlib

@@ -5,6 +5,10 @@ module mymathlib
   real(dp), parameter :: pi = atan(1._dp)*4._dp
   real(dp), parameter :: eps = epsilon(1._dp)
 
+  real(dp), parameter, dimension(3) :: xAxis = (/1._dp,0._dp,0._dp/)
+  real(dp), parameter, dimension(3) :: yAxis = (/0._dp,1._dp,0._dp/)
+  real(dp), parameter, dimension(3) :: zAxis = (/0._dp,0._dp,1._dp/)
+
 contains
 
   ! -------------------------------------------------
@@ -48,6 +52,20 @@ contains
     xout=xstart+(xend-xstart)*0.5_dp*(1._dp-cos(theta_spacing))
 
   end function cosspace
+
+  ! -------------------------------------------------
+  !                halfsinspace
+  ! -------------------------------------------------
+  function halfsinspace(xstart,xend,nx) result(xout)
+    real(dp), intent(in) :: xstart, xend
+    integer , intent(in) :: nx
+    real(dp), dimension(nx) :: xout
+    real(dp), dimension(nx) :: theta_spacing
+
+    theta_spacing=linspace(0._dp,pi*0.5_dp,nx)
+    xout=xstart+(xend-xstart)*sin(theta_spacing)
+
+  end function halfsinspace
 
   ! -------------------------------------------------
   !                cross3
@@ -114,7 +132,8 @@ contains
     ! Variables for LU Decomposition
     real(dp), dimension(size(A,1),size(A,1)) :: L,U,P
     real(dp), dimension(size(A,1)) :: Pb,d,x,bvec
-    real(dp) :: sumu, suml, det
+    real(dp) :: sumu, suml
+    real(dp), dimension(size(A,1)) :: diagonalTerms
 
     n=size(A,1)
     A_dummy=A
@@ -164,9 +183,8 @@ contains
     enddo
 
     ! Assigning all zero elements in triangular matrices
-    det=1._dp
     do i=1,n
-      det=det*U(i,i)
+      diagonalTerms(i)=U(i,i)
       do j=1,n
         if (i>j) then
           U(i,j)=0._dp
@@ -176,16 +194,20 @@ contains
       enddo
     enddo
 
-    ! Checking Determinant for singularity
-    if (abs(det)<eps) then
-      print*
-      print*,'ERROR: Matrix is Singular or Ill-conditioned!!'
-      call print_mat(A)
-      print*,'Determinant was found to be:'
-      print*,det
-      call print_mat(U)
-      stop 404
-    endif
+    ! Checking diagonal elements for zero
+    ! If determinant is computed here by multiplication,
+    ! for large matrices it may produce floating point overflow
+    do i=1,n
+      if (abs(diagonalTerms(i))<eps) then
+        print*
+        print*,'ERROR: Matrix is Singular or Ill-conditioned!!'
+        print*,'A-matrix:'
+        call print_mat(A)
+        print*,'U-matrix:'
+        call print_mat(U)
+        stop 404
+      endif
+    enddo
 
     ! Changing RHS loop
     do bb=1,n
@@ -221,6 +243,34 @@ contains
 
   end function inv
 
+  function isInverse(A,Ainv)
+    logical :: isInverse
+    real(dp), intent(in), dimension(:,:) :: A, Ainv
+    real(dp), dimension(size(A,1),size(A,2)) :: productMat
+    integer :: i,j
+    real(dp) :: tol
+
+    productMat=matmul(A,Ainv)
+    isInverse=.TRUE.
+    tol=eps*1000._dp
+
+    do j=1,size(A,2)
+      do i=1,size(A,1)
+        if (i .ne. j) then
+          ! Check if off-diagonal values are 0._dp
+          if (productMat(i,j) > tol) then
+            isInverse=.FALSE.
+          endif
+        else
+          ! Check if on-diagonal values are 1._dp
+          if (productMat(i,j)-1._dp > tol) then
+            isInverse=.FALSE.
+          endif
+        endif
+      enddo
+    enddo
+  end function isInverse
+
   ! -------------------------------------------------
   !                print_mat
   ! -------------------------------------------------
@@ -239,6 +289,73 @@ contains
     enddo
     100 format(ES14.3)
   end subroutine print_mat
+
+  ! -------------------------------------------------
+  !                norm
+  ! -------------------------------------------------
+  function norm(abcvec)
+    real(dp), intent(in), dimension(:) :: abcvec
+    real(dp) :: norm
+    integer :: is
+    norm =0._dp
+    do is=1,size(abcvec)
+      norm = norm + abcvec(is)*abcvec(is)
+    enddo
+    norm=sqrt(norm)
+  end function norm
+
+  !--------------------------------------------------------!
+  !              Transformation Functions                  !
+  !--------------------------------------------------------!
+  ! Code to generate Transformation matrices in Octave
+  !
+  ! clc; clear;
+  ! pkg load symbolic;
+  ! syms p t s
+  ! Rp=[[1,0,0];[0,cos(p),sin(p)];[0,-sin(p),cos(p)]];
+  ! Rt=[[cos(t),0,-sin(t)];[0,1,0];[sin(t),0,cos(t)]];
+  ! Rs=[[cos(s),sin(s),0];[-sin(s),cos(s),0];[0,0,1]];
+  ! Tbg=Rp*Rt*Rs
+  ! Tgb=Rs'*Rt'*Rp'
+
+  ! Transformation matrix bg
+  function Tbg(cs_phi,cs_theta,cs_psi)
+    real(dp), dimension(2), intent(in) :: cs_phi, cs_theta, cs_psi  ! cos and sin
+    real(dp), dimension(3,3) :: Tbg
+    Tbg(1,:)=(/cs_psi(1)*cs_theta(1),cs_theta(1)*cs_psi(2),-1._dp*cs_theta(2)/)
+    Tbg(2,1)=cs_psi(1)*cs_phi(2)*cs_theta(2)-cs_phi(1)*cs_psi(2)
+    Tbg(2,2)=cs_phi(1)*cs_psi(1)+cs_phi(2)*cs_psi(2)*cs_theta(2)
+    Tbg(2,3)=cs_theta(1)*cs_phi(2)
+    Tbg(3,1)=cs_phi(1)*cs_psi(1)*cs_theta(2)+cs_phi(2)*cs_psi(2)
+    Tbg(3,2)=cs_phi(1)*cs_psi(2)*cs_theta(2)-cs_psi(1)*cs_phi(2)
+    Tbg(3,3)=cs_phi(1)*cs_theta(1)
+  end function Tbg
+
+  function Tgb(cs_phi,cs_theta,cs_psi)
+    real(dp), dimension(2), intent(in) :: cs_phi, cs_theta, cs_psi  ! cos and sin
+    real(dp), dimension(3,3) :: Tgb
+    Tgb(1,1)=cs_psi(1)*cs_theta(1)
+    Tgb(1,2)=cs_phi(2)*cs_theta(2)*cs_psi(1)-cs_psi(2)*cs_phi(1)
+    Tgb(1,3)=cs_phi(2)*cs_psi(2)+cs_theta(2)*cs_phi(1)*cs_psi(1)
+    Tgb(2,1)=cs_psi(2)*cs_theta(1)
+    Tgb(2,2)=cs_phi(2)*cs_psi(2)*cs_theta(2)+cs_phi(1)*cs_psi(1)
+    Tgb(2,3)=cs_psi(2)*cs_theta(2)*cs_phi(1)-cs_phi(2)*cs_psi(1)
+    Tgb(3,1)=-cs_theta(2)
+    Tgb(3,2)=cs_phi(2)*cs_theta(1)
+    Tgb(3,3)=cs_phi(1)*cs_theta(1)
+  end function Tgb
+
+  !|------+----------------------+------|
+  !| ++++ | Bookeeping functions | ++++ |
+  !|------+----------------------+------|
+
+  subroutine skiplines(fileunit,nlines)
+    integer, intent(in) :: fileunit,nlines
+    integer :: i
+    do i=1,nlines
+      read(fileunit,*)
+    enddo
+  end subroutine skiplines
 
 
 end module mymathlib

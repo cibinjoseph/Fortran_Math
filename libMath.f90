@@ -9,6 +9,8 @@ module libMath
   real(dp), parameter, dimension(3) :: yAxis = (/0._dp, 1._dp, 0._dp/)
   real(dp), parameter, dimension(3) :: zAxis = (/0._dp, 0._dp, 1._dp/)
 
+  character(len=1), parameter :: commentChar = '#'
+
   interface lsq2
     module procedure lsq2_scalar, lsq2_array
   end interface
@@ -477,5 +479,18 @@ contains
     enddo
     trapz = 0.5_dp*trapz
   end function trapz
+
+  ! Skips comments in input files
+  ! Comment character is set using the global var commentChar
+  subroutine skip_comments(fileUnit)
+    integer, intent(in) :: fileUnit
+    character(len=1) :: firstChar
+
+    firstChar = commentChar
+    do while (firstChar .eq. commentChar)
+      read(fileUnit, '(A)') firstChar
+    enddo
+    backspace(fileUnit)
+  end subroutine skip_comments
 
 end module libMath

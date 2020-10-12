@@ -478,16 +478,4 @@ contains
     trapz = 0.5_dp*trapz
   end function trapz
 
-  !|------+----------------------+------|
-  !| ++++ | Bookeeping functions | ++++ |
-  !|------+----------------------+------|
-
-  subroutine skiplines(fileunit, nlines)
-    integer, intent(in) :: fileunit, nlines
-    integer :: i
-    do i = 1, nlines
-      read (fileunit, *)
-    enddo
-  end subroutine skiplines
-
 end module libMath

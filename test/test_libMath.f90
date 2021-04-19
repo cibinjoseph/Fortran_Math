@@ -43,6 +43,7 @@ contains
     x = (/1._dp, 2._dp, 3._dp, 4._dp, 5._dp/)
     y = x*10._dp
 
+    call assert_equal(interp1(1.0_dp, x, y, 1), 10._dp)
     call assert_equal(interp1(2.9_dp, x, y, 1), 29._dp)
     call assert_equal(interp1(5.0_dp, x, y, 1), 50._dp)
 

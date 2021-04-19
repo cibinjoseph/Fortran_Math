@@ -413,6 +413,9 @@ contains
           interp1 = y(ix-2)*L0 + y(ix-1)*L1 + y(ix)*L2
         endif
 
+      case default 
+        error stop "Specified order not implemented"
+
       end select
     endif
 

@@ -38,14 +38,23 @@ contains
     use libMath, only: interp1
     use naturalfruit
     real(dp), dimension(5) :: x
-    real(dp), dimension(5) :: y
+    real(dp), dimension(5) :: y, ya
 
     x = (/1._dp, 2._dp, 3._dp, 4._dp, 5._dp/)
     y = x*10._dp
+    ya = y
+    ya(3) = 35._dp
 
-    call assert_equal(interp1(1.0_dp, x, y, 1), 10._dp)
-    call assert_equal(interp1(2.9_dp, x, y, 1), 29._dp)
-    call assert_equal(interp1(5.0_dp, x, y, 1), 50._dp)
+    call assert_equal(interp1(1.0_dp, x, y, 1), 10._dp, delta=1.0D-6)
+    call assert_equal(interp1(2.9_dp, x, y, 1), 29._dp, delta=1.0D-6)
+    call assert_equal(interp1(5.0_dp, x, y, 1), 50._dp, delta=1.0D-6)
+
+    call assert_equal(interp1(1.0_dp, x, y, 2), 10._dp, delta=1.0D-6)
+    call assert_equal(interp1(1.2_dp, x, ya, 2), 11.6_dp, delta=1.0D-6)
+    call assert_equal(interp1(2.9_dp, x, y, 2), 29._dp, delta=1.0D-6)
+    call assert_equal(interp1(2.9_dp, x, ya, 2), 33.275_dp, delta=1.0D-6)
+    call assert_equal(interp1(4.8_dp, x, ya, 2), 47.6_dp, delta=1.0D-6)
+    call assert_equal(interp1(5.0_dp, x, y, 2), 50._dp, delta=1.0D-6)
 
   end subroutine test_interp1
 end module test_libMath

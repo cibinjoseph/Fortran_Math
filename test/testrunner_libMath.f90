@@ -9,6 +9,7 @@ program testrunner_libMath
   call testsuite_initialize()
   call test_linspace()
   call test_trapz()
+  call test_interp1()
   call testsuite_summary()
   call testsuite_finalize()
 end program testrunner_libMath

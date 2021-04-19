@@ -33,4 +33,18 @@ contains
     call assert_equal(trapz(y, x), correct)
     call testcase_finalize()
   end subroutine test_trapz
+
+  subroutine test_interp1()
+    use libMath, only: interp1
+    use naturalfruit
+    real(dp), dimension(5) :: x
+    real(dp), dimension(5) :: y
+
+    x = (/1._dp, 2._dp, 3._dp, 4._dp, 5._dp/)
+    y = x*10._dp
+
+    call assert_equal(interp1(2.9_dp, x, y, 1), 29._dp)
+    call assert_equal(interp1(5.0_dp, x, y, 1), 50._dp)
+
+  end subroutine test_interp1
 end module test_libMath

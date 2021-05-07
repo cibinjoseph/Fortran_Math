@@ -45,10 +45,14 @@ contains
     ya = y
     ya(3) = 35._dp
 
+    call assert_equal(interp1(0.5_dp, &
+      & (/0._dp, 1._dp/), (/0._dp, 0._dp/), 1), 0.0_dp, delta=1.0D-6)
     call assert_equal(interp1(1.0_dp, x, y, 1), 10._dp, delta=1.0D-6)
     call assert_equal(interp1(2.9_dp, x, y, 1), 29._dp, delta=1.0D-6)
     call assert_equal(interp1(5.0_dp, x, y, 1), 50._dp, delta=1.0D-6)
 
+    call assert_equal(interp1(0.5_dp, &
+      & (/0._dp, 1._dp/), (/0._dp, 0._dp/), 2), 0.0_dp, delta=1.0D-6)
     call assert_equal(interp1(1.0_dp, x, y, 2), 10._dp, delta=1.0D-6)
     call assert_equal(interp1(1.2_dp, x, ya, 2), 11.6_dp, delta=1.0D-6)
     call assert_equal(interp1(2.9_dp, x, y, 2), 29._dp, delta=1.0D-6)

@@ -59,6 +59,21 @@ contains
     call assert_equal(interp1(2.9_dp, x, ya, 2), 33.275_dp, delta=1.0D-6)
     call assert_equal(interp1(4.8_dp, x, ya, 2), 47.6_dp, delta=1.0D-6)
     call assert_equal(interp1(5.0_dp, x, y, 2), 50._dp, delta=1.0D-6)
-
   end subroutine test_interp1
+
+  subroutine test_inv2()
+    use libMath, only: inv2
+    use naturalfruit
+    real(dp), dimension(3, 3) :: mat, trueval
+
+    mat(1, :) = [1._dp, -1._dp,  2._dp]
+    mat(2, :) = [4._dp,  0._dp,  6._dp]
+    mat(3, :) = [0._dp,  1._dp, -1._dp]
+
+    trueval(:, 1) = [ 3.0_dp, -2.0_dp, -2._dp]
+    trueval(:, 2) = [-0.5_dp,  0.5_dp,  0.5_dp]
+    trueval(:, 3) = [ 3.0_dp, -1.0_dp, -2._dp]
+
+    call assert_equal(inv2(mat), trueval, delta=1.0D-6)
+  end subroutine test_inv2
 end module test_libMath

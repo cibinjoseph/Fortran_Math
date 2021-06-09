@@ -1,5 +1,6 @@
 FC = gfortran 
 src = ..
+libs = -llapack -lblas
 
 all:
 	make tests
@@ -16,7 +17,7 @@ test_libMath.o: test_libMath.f90  naturalfruit.o libMath.o
 	$(FC) -c test_libMath.f90 
 
 testrunner_libMath.out: testrunner_libMath.f90 test_libMath.o naturalfruit.o
-	$(FC) testrunner_libMath.f90 naturalfruit.o test_libMath.o libMath.o -o testrunner_libMath.out
+	$(FC) testrunner_libMath.f90 naturalfruit.o test_libMath.o libMath.o -o testrunner_libMath.out $(libs)
 
 tests: testrunner_libMath.out
 	./testrunner_libMath.out

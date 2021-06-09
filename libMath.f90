@@ -69,8 +69,26 @@ contains
     k = size(A, 2)
     AB = 0._dp
 
-    call DGEMM('N', 'N', m, size(B, 2), k, 1._dp, A, m, B, k, 1._dp, AB, m)
+    call DGEMM('N', 'N', m, size(B, 2), k, 1._dp, A, m, B, k, 0._dp, AB, m)
   end function matmul2
+
+  ! -------------------------------------------------
+  !                matmulAX
+  ! -------------------------------------------------
+  function matmulAX(A, X) result(AX)
+    !! Matrix multiplication with vector implemented using BLAS
+    real(dp), dimension(:, :), intent(in) :: A
+    real(dp), dimension(:), intent(in) :: X
+    real(dp), dimension(size(A, 1)) :: AX
+    integer :: m, n
+
+    external DGEMV
+
+    m = size(A, 1)
+    n = size(A, 2)
+
+    call DGEMV('N', m, n, 1._dp, A, m, X, 1, 0._dp, AX, 1)
+  end function matmulAX
 
   ! -------------------------------------------------
   !                length3d

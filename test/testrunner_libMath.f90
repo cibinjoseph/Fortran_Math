@@ -10,6 +10,8 @@ program testrunner_libMath
   call test_linspace()
   call test_trapz()
   call test_interp1()
+  call test_inv2()
+  call test_matmulAX()
   call testsuite_summary()
   call testsuite_finalize()
 end program testrunner_libMath

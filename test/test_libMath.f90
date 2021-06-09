@@ -74,6 +74,23 @@ contains
     trueval(:, 2) = [-0.5_dp,  0.5_dp,  0.5_dp]
     trueval(:, 3) = [ 3.0_dp, -1.0_dp, -2._dp]
 
-    call assert_equal(inv2(mat), trueval, delta=1.0D-6)
+    call assert_equal(trueval, inv2(mat), delta=1.0D-6)
   end subroutine test_inv2
+
+  subroutine test_matmulAX()
+    use libMath, only: matmulAX
+    use naturalfruit
+    real(dp), dimension(3, 3) :: mat
+    real(dp), dimension(3) :: x, trueval
+
+    mat(1, :) = [1._dp, -1._dp,  2._dp]
+    mat(2, :) = [4._dp,  0._dp,  6._dp]
+    mat(3, :) = [0._dp,  1._dp, -1._dp]
+
+    x = [1._dp, 2._dp, 3._dp]
+
+    trueval = [ 5.0_dp, 22.0_dp, -1._dp]
+
+    call assert_equal(trueval, matmulAX(mat, x), delta=1.0D-6)
+  end subroutine test_matmulAX
 end module test_libMath
